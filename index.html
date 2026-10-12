@@ -5,47 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kitty</title>
 <style>
-  :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --accent:#3b82f6; }
+  :root { --bg:#0f172a; --accent:#3b82f6; }
   * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; background:radial-gradient(circle at top,#1e3a8a 0%,var(--bg) 60%);
-         color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-         display:flex; align-items:center; justify-content:center; padding:32px 16px; }
-  .wrap { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; align-items:stretch; width:100%; max-width:960px; }
-  .card { background:var(--card); border-radius:20px; padding:20px; flex:1 1 360px; max-width:440px;
-          box-shadow:0 10px 30px rgba(0,0,0,.35); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
-  .gif { width:100%; border-radius:12px; overflow:hidden; }
-  .gif img { width:100%; display:block; }
-  button { background:var(--accent); color:#fff; border:0; border-radius:999px; width:64px; height:64px;
-           font-size:1.6rem; cursor:pointer; transition:transform .1s; }
-  button:active { transform:scale(.94); }
-  .vid { width:100%; border-radius:12px; display:block; background:#000; }
-  a.link { color:#93c5fd; text-align:center; font-size:.95rem; }
-  .muted { color:var(--muted); font-size:.85rem; text-align:center; margin:0; }
+  html, body { margin:0; height:100%; overflow:hidden; }
+  body { background:radial-gradient(circle at top,#1e3a8a 0%,var(--bg) 60%);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         display:flex; align-items:center; justify-content:center; padding:16px; }
+  .vid { width:min(900px, 100%); max-height:80vh; border-radius:16px; display:block; background:#000;
+         box-shadow:0 20px 50px rgba(0,0,0,.5); }
+  #play { position:fixed; right:20px; bottom:20px; z-index:20; background:var(--accent); color:#fff; border:0;
+          border-radius:999px; width:64px; height:64px; font-size:1.7rem; cursor:pointer;
+          box-shadow:0 8px 24px rgba(0,0,0,.45); transition:transform .1s; }
+  #play:active { transform:scale(.92); }
+
+  /* the meme that jumps out of a corner */
+  #meme { position:fixed; width:min(300px, 45vw); z-index:15; pointer-events:none; border-radius:14px;
+          opacity:0; transition:transform .35s cubic-bezier(.2,1.4,.4,1), opacity .25s; }
+  #meme.tl { top:16px; left:16px;  transform:translate(-130%,-130%) rotate(-25deg); }
+  #meme.tr { top:16px; right:16px; transform:translate(130%,-130%) rotate(25deg); }
+  #meme.bl { bottom:16px; left:16px;  transform:translate(-130%,130%) rotate(25deg); }
+  #meme.br { bottom:96px; right:16px; transform:translate(130%,130%) rotate(-25deg); }
+  #meme.in { opacity:1; transform:translate(0,0) rotate(0); }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="card">
-      <div class="gif"><img src="https://media1.tenor.com/m/_yRGt6I8qLQAAAAC/cat-yell.gif" alt="Kitty with a sword"></div>
-      <button id="play" aria-label="Play sound">🔊</button>
-      <audio id="snd" src="raaaah.mp3" preload="auto" autoplay></audio>
-    </section>
+  <video class="vid" src="video.mp4" controls playsinline preload="metadata"></video>
 
-    <section class="card">
-      <video class="vid" src="video.mp4" controls playsinline preload="metadata"></video>
-    </section>
-  </div>
+  <img id="meme" src="https://media1.tenor.com/m/_yRGt6I8qLQAAAAC/cat-yell.gif" alt="">
+  <button id="play" aria-label="Call the kitty">🔊</button>
+  <audio id="snd" src="raaaah.mp3" preload="auto"></audio>
 
   <script>
-    const snd = document.getElementById('snd');
-    let played = false;
-    const tryPlay = () => snd.play().then(() => { played = true; }).catch(() => {});
-    // Play immediately on open (works where the browser allows autoplay with sound)
-    tryPlay();
-    // Fallback: browsers that block autoplay -> play on the very first touch/click/key
-    const first = () => { if (!played) tryPlay(); ['pointerdown','keydown','touchstart'].forEach(e => removeEventListener(e, first)); };
-    ['pointerdown','keydown','touchstart'].forEach(e => addEventListener(e, first, {once:false}));
-    document.getElementById('play').addEventListener('click', e => { e.stopPropagation(); snd.currentTime = 0; snd.play(); played = true; });
+    const meme = document.getElementById('meme'), snd = document.getElementById('snd');
+    const corners = ['tl','tr','bl','br'];
+    let busy = false;
+    function popKitty() {
+      if (busy) return; busy = true;
+      meme.className = corners[Math.floor(Math.random()*4)]; // park off-screen in a random corner
+      void meme.offsetWidth;                                   // reflow so the slide-in animates
+      meme.classList.add('in');
+      snd.currentTime = 0; snd.play().catch(()=>{});
+      setTimeout(() => meme.classList.remove('in'), 2000);     // leave after 2 s
+      setTimeout(() => { busy = false; }, 2400);
+    }
+    document.getElementById('play').addEventListener('click', popKitty);
+    // Try once on open (only works where the browser allows sound without a tap)
+    snd.play().then(() => { snd.pause(); popKitty(); }).catch(()=>{});
   </script>
 </body>
 </html>
