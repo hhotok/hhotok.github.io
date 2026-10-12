@@ -2,61 +2,54 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kitty with a Sword</title>
+<title>Kitty</title>
 <style>
   :root { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --accent:#3b82f6; }
   * { box-sizing:border-box; }
   body { margin:0; min-height:100vh; background:radial-gradient(circle at top,#1e3a8a 0%,var(--bg) 60%);
          color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-         display:flex; flex-direction:column; align-items:center; padding:32px 16px; }
-  h1 { margin:0 0 24px; font-size:clamp(1.6rem,4vw,2.4rem); text-align:center; }
+         display:flex; align-items:center; justify-content:center; padding:32px 16px; }
   .wrap { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; align-items:stretch; width:100%; max-width:960px; }
   .card { background:var(--card); border-radius:20px; padding:20px; flex:1 1 360px; max-width:440px;
-          box-shadow:0 10px 30px rgba(0,0,0,.35); display:flex; flex-direction:column; align-items:center; gap:16px; }
-  .card h2 { margin:0; font-size:1.2rem; }
+          box-shadow:0 10px 30px rgba(0,0,0,.35); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
   .gif { width:100%; border-radius:12px; overflow:hidden; }
-  button { background:var(--accent); color:#fff; border:0; border-radius:999px; padding:12px 24px;
-           font-size:1rem; font-weight:600; cursor:pointer; transition:transform .1s; }
-  button:active { transform:scale(.96); }
+  .gif img { width:100%; display:block; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:999px; width:64px; height:64px;
+           font-size:1.6rem; cursor:pointer; transition:transform .1s; }
+  button:active { transform:scale(.94); }
   .qr { width:100%; max-width:340px; aspect-ratio:1; border-radius:12px; background:#fff; padding:10px; }
   .qr img { width:100%; height:100%; object-fit:contain; display:block; }
-  a.link { color:#93c5fd; word-break:break-all; text-align:center; font-size:.95rem; }
+  a.link { color:#93c5fd; text-align:center; font-size:.95rem; }
   .muted { color:var(--muted); font-size:.85rem; text-align:center; margin:0; }
 </style>
 </head>
 <body>
-  <h1>⚔️ Kitty with a Sword ⚔️</h1>
   <div class="wrap">
     <section class="card">
-      <h2>The meme</h2>
-      <div class="gif">
-        <div class="tenor-gif-embed" data-postid="18384897333348051124" data-share-method="host" data-aspect-ratio="1" data-width="100%">
-          <a href="https://tenor.com/view/cat-yell-skeleton-shield-gif-18384897333348051124">Cat Yell GIF</a>
-        </div>
-      </div>
-      <button id="play">🔊 RAAAAH!</button>
-      <audio id="snd" src="https://www.myinstants.com/media/sounds/raaaah-skeleton.mp3" preload="auto"></audio>
-      <p class="muted">GIF via Tenor · sound via Myinstants</p>
+      <div class="gif"><img src="https://media1.tenor.com/m/_yRGt6I8qLQAAAAC/cat-yell.gif" alt="Kitty with a sword"></div>
+      <button id="play" aria-label="Play sound">🔊</button>
+      <audio id="snd" src="https://www.myinstants.com/media/sounds/raaaah-skeleton.mp3" preload="auto" autoplay></audio>
     </section>
 
     <section class="card">
-      <h2>Scan me</h2>
       <div class="qr"><img src="qr.jpg" alt="QR code"></div>
       <p class="muted">Can't scan it? Open the link:</p>
       <a class="link" href="https://drive.google.com/file/d/1ga6ub5f3zIM_evVA3cdNJq0LWC2OamaV/view?usp=drivesdk" target="_blank" rel="noopener">Open the file on Google Drive</a>
     </section>
   </div>
 
-  <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
   <script>
     const snd = document.getElementById('snd');
-    document.getElementById('play').addEventListener('click', () => { snd.currentTime = 0; snd.play(); });
-    // Try to play once on first interaction anywhere (browsers block autoplay with sound)
-    document.addEventListener('pointerdown', function once(e) {
-      if (e.target.id !== 'play') { snd.play().catch(()=>{}); }
-      document.removeEventListener('pointerdown', once);
-    });
+    let played = false;
+    const tryPlay = () => snd.play().then(() => { played = true; }).catch(() => {});
+    // Play immediately on open (works where the browser allows autoplay with sound)
+    tryPlay();
+    // Fallback: browsers that block autoplay -> play on the very first touch/click/key
+    const first = () => { if (!played) tryPlay(); ['pointerdown','keydown','touchstart'].forEach(e => removeEventListener(e, first)); };
+    ['pointerdown','keydown','touchstart'].forEach(e => addEventListener(e, first, {once:false}));
+    document.getElementById('play').addEventListener('click', e => { e.stopPropagation(); snd.currentTime = 0; snd.play(); played = true; });
   </script>
 </body>
 </html>
