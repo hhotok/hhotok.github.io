@@ -18,8 +18,7 @@
   button { background:var(--accent); color:#fff; border:0; border-radius:999px; width:64px; height:64px;
            font-size:1.6rem; cursor:pointer; transition:transform .1s; }
   button:active { transform:scale(.94); }
-  .qr { width:100%; max-width:340px; aspect-ratio:1; border-radius:12px; background:#fff; padding:10px; }
-  .qr img { width:100%; height:100%; object-fit:contain; display:block; }
+  .vid { width:100%; border-radius:12px; display:block; background:#000; }
   a.link { color:#93c5fd; text-align:center; font-size:.95rem; }
   .muted { color:var(--muted); font-size:.85rem; text-align:center; margin:0; }
 </style>
@@ -33,9 +32,7 @@
     </section>
 
     <section class="card">
-      <div class="qr"><img src="qr.jpg" alt="QR code"></div>
-      <p class="muted">Can't scan it? Open the link:</p>
-      <a class="link" href="https://drive.google.com/file/d/1ga6ub5f3zIM_evVA3cdNJq0LWC2OamaV/view?usp=drivesdk" target="_blank" rel="noopener">Open the file on Google Drive</a>
+      <video class="vid" src="video.mp4" controls playsinline preload="metadata"></video>
     </section>
   </div>
 
